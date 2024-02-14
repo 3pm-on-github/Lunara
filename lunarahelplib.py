@@ -1,7 +1,7 @@
 # made this library to help devs program lunara
 
 class LunaraHelpLib():
-    def isanint(thing):
+    def isanint(self, thing):
         try:
             int(thing)
             return True
