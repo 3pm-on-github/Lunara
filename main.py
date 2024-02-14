@@ -6,6 +6,8 @@ CREDITS = [
 
 def arun(filepath):
     with open(filepath, "r") as f:
+        varnames, vartypes, varcontents = [], [], []
+        allowedsymbols = ["a", "b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"]
         for line in f.read().split("\n"):
             if line.startswith("println(") and line.endswith(")"):
                 toprint = line.removeprefix("println(").removesuffix(")")
@@ -17,6 +19,38 @@ def arun(filepath):
                     print("Error: What the hell, do you really create strings like that: \"'? You disgust me.")
                 elif toprint.startswith("'") and toprint.endswith('"'):
                     print("Error: What the hell, do you really create strings like that: '\"? You disgust me.")
+                elif toprint in varnames:
+                    print(varcontents[varnames.index(toprint)])
+            elif "->" in line:
+                try:
+                    int(line.split("->")[0].removesuffix(" "))
+                    print("Error: Variable name cannot be an int.")
+                    break
+                except:
+                    error = False
+                    for char in line.split("->")[0].removesuffix(" "):
+                        if char not in allowedsymbols:
+                            print(f"Error: Variable name cannot contain the character {char}")
+                            error = True
+                    if error:break
+                    varnames.append(line.split("->")[0].removesuffix(" "))
+                    varcontent = line.split("->")[1].removeprefix(" ")
+                    vartype = ""
+                    if varcontent.startswith("'") and varcontent.endswith("'"):
+                        varcontent = varcontent.removeprefix("'").removesuffix("'")
+                        vartype = "str"
+                    elif varcontent.startswith('"') and varcontent.endswith('"'):
+                        varcontent = varcontent.removeprefix('"').removesuffix('"')
+                        vartype = "str"
+                    elif varcontent.startswith('"') and varcontent.endswith("'"):
+                        error = True
+                        print("Error: What the hell, do you really create strings like that: \"'? You disgust me.")
+                    elif varcontent.startswith("'") and varcontent.endswith('"'):
+                        error = True
+                        print("Error: What the hell, do you really create strings like that: '\"? You disgust me.")
+                    if error:break
+                    varcontents.append(varcontent)
+                    vartypes.append(vartype)
 
 def run(filepath):
     if os.path.exists("settings.lnst"):
@@ -60,6 +94,8 @@ def main():
         print("Usage: lunara <command> [filename]")
         print("help: Shows this message")
         print("run: Runs a Lunara file")
+        print("credits: Shows credits")
+        print("version: Shows the version")
     elif command == "credits":
         print("Credits:")
         for item in CREDITS:
