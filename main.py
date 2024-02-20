@@ -1,5 +1,7 @@
-import sys, os
+import sys
+import os
 from lunarahelplib import LunaraHelpLib
+
 lhl = LunaraHelpLib()
 VERSION = "v0.0.02A"
 CREDITS = [
@@ -9,15 +11,35 @@ CREDITS = [
 def arun(filepath):
     with open(filepath, "r") as f:
         varnames, vartypes, varcontents = [], [], []
-        allowedsymbols = ["a", "b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"]
-        for line in f.read().split("\n"):
+        allowedsymbols = set("abcdefghijklmnopqrstuvwxyz0123456789")
+        condition = False
+        inanif = False
+        error = False
+        comment = False
+        linenum = 0
+
+        def run(line, inanif):
+            nonlocal condition, comment, error, linenum
+
             line = line.lstrip()
-            if line.startswith("println(") and line.endswith(")"):
+            if inanif and not condition:
+                pass
+            elif line == "":
+                pass
+            elif comment:
+                pass
+            elif line.startswith("//"):
+                pass
+            elif line.startswith("//["):
+                comment = True
+            elif line.endswith("]//"):
+                comment = False
+            elif line.startswith("println(") and line.endswith(")"):
                 toprint = line.removeprefix("println(").removesuffix(")")
                 if toprint.startswith("'") and toprint.endswith("'"):
-                    print(toprint.removeprefix("'").removesuffix("'"))
+                    print(toprint[1:-1])
                 elif toprint.startswith('"') and toprint.endswith('"'):
-                    print(toprint.removeprefix('"').removesuffix('"'))
+                    print(toprint[1:-1])
                 elif toprint.startswith('"') and toprint.endswith("'"):
                     print("Error Code 000-0004\nWhat the hell, do you really create strings like that: \"'? You disgust me.")
                 elif toprint.startswith("'") and toprint.endswith('"'):
@@ -28,22 +50,19 @@ def arun(filepath):
                 try:
                     int(line.split("->")[0].removesuffix(" "))
                     print("Error Code 000-0005\nVariable name cannot be an int.")
-                    break
                 except:
-                    error = False
                     for char in line.split("->")[0].removesuffix(" "):
                         if char not in allowedsymbols:
                             print(f"Error Code 000-0005\nVariable name cannot contain the character {char}")
                             error = True
-                    if error:break
                     varnames.append(line.split("->")[0].removesuffix(" "))
                     varcontent = line.split("->")[1].removeprefix(" ")
                     vartype = ""
                     if varcontent.startswith("'") and varcontent.endswith("'"):
-                        varcontent = varcontent.removeprefix("'").removesuffix("'")
+                        varcontent = varcontent[1:-1]
                         vartype = "str"
                     elif varcontent.startswith('"') and varcontent.endswith('"'):
-                        varcontent = varcontent.removeprefix('"').removesuffix('"')
+                        varcontent = varcontent[1:-1]
                         vartype = "str"
                     elif varcontent.startswith('"') and varcontent.endswith("'"):
                         error = True
@@ -58,23 +77,40 @@ def arun(filepath):
                         print("Error Code 000-0006")
                         print("Variable cannot contain anything other than a string, or an int.")
                         print("Possible Cause: You probably made a typo.")
-                    if error:break
                     varcontents.append(varcontent)
                     vartypes.append(vartype)
+            elif line.startswith("if "):
+                condition = line.split("{")[0].removeprefix("if ")
+                if condition.endswith(" "): condition = condition.removesuffix(" ")
+                if condition == "true":
+                    condition = True
+                elif condition == "false":
+                    condition = False
+                    print(f"Warning Code W-000-0001\nif at line {linenum} is never gonna be runned.\nWe prefer you to remove this if at it is never gonna be runned.")
+                if line.endswith("}"):
+                    run(line.removeprefix(line.split("{")[0] + "{").removesuffix('}'), inanif=True)
+                else:
+                    inanif = True
+                    run(line.removeprefix(line.split("{")[0] + "{"), inanif=True)
+            elif inanif and line.endswith("}"):
+                inanif = False
+                run(line.removesuffix("}"), inanif=False)
+
+        for line in f:
+            linenum += 1
+            run(line.strip(), inanif=inanif)
+            if error:
+                break
 
 def run(filepath):
     if os.path.exists("settings.lnst"):
         RunOnlyLNFiles = None
-        for line in open("settings.lnst", "r").read().split("\n"):
+        for line in open("settings.lnst", "r"):
             if line.startswith("RunOnlyLNFiles"):
-                if line.removeprefix("RunOnlyLNFiles: ") == "Y":
-                    RunOnlyLNFiles = True
-                else:
-                    RunOnlyLNFiles = False
+                RunOnlyLNFiles = line.strip().endswith("Y")
+                break
         if os.path.exists(filepath):
-            if (filepath.endswith(".ln") or filepath.endswith(".ln'") or filepath.endswith('.ln"')) and RunOnlyLNFiles:
-                arun(filepath)
-            elif not RunOnlyLNFiles:
+            if filepath.endswith((".ln", ".ln'", '.ln"')) and (not RunOnlyLNFiles or filepath.endswith(".ln")):
                 arun(filepath)
             else:
                 print("Error Code 000-0003\nFile isn't a .ln file.")
@@ -84,22 +120,15 @@ def run(filepath):
         print("Error Code 000-0001\nsettings.lnst file doesn't exist, did you run the setup.py script before using Lunara ?")
 
 def main():
-    # totally not generated by ai
-    print(f"Lunara {VERSION} by GachaYTB3")
-    if len(sys.argv) > 3:
+    if len(sys.argv) < 3:
         print("Usage: lunara <command> <filepath>")
         return
     
     command = sys.argv[1]
-    if len(sys.argv) > 2:
-        filename = sys.argv[2]
+    filename = sys.argv[2]
 
     if command == "run":
-        if len(sys.argv) > 2:
-            run(filename)
-        else:
-            # umm excuse me why the actual fuck did u only put 1 arg
-            print("Error Code MM-000-0001\n2 arguments or more expected, found only 1")
+        run(filename)
     elif command == "help":
         print("Usage: lunara <command> [filename]")
         print("help: Shows this message")
@@ -111,8 +140,7 @@ def main():
         for item in CREDITS:
             print(f"{item[0]}: {item[1]}")
     elif command == "version":
-        # well i basically just need to print nothing bcz it already prints the version when u run it
-        pass
+        print(f"Lunara {VERSION} by GachaYTB3")
     else:
         print(f"Error Code MM-000-0002\nInvalid command. To get help with commands, run lunara help.")
 
