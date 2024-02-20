@@ -88,7 +88,11 @@ def arun(filepath):
                     condition = False
                     print(f"Warning Code W-000-0001\nif at line {linenum} is never gonna be runned.\nWe prefer you to remove this if at it is never gonna be runned.")
                 if line.endswith("}"):
-                    run(line.removeprefix(line.split("{")[0] + "{").removesuffix('}'), inanif=True)
+                    if ";" in line.removeprefix(line.split("{")[0] + "{").removesuffix('}'):
+                        for miniline in line.removeprefix(line.split("{")[0] + "{").removesuffix('}').split(";"):
+                            run(miniline, inanif=True)
+                    else:
+                        run(line.removeprefix(line.split("{")[0] + "{").removesuffix('}'), inanif=True)
                 else:
                     inanif = True
                     run(line.removeprefix(line.split("{")[0] + "{"), inanif=True)
