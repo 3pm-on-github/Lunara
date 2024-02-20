@@ -1,7 +1,7 @@
 import sys, os
 from lunarahelplib import LunaraHelpLib
 lhl = LunaraHelpLib()
-VERSION = "v0.0.01A"
+VERSION = "v0.0.02A"
 CREDITS = [
     ["GachaYTB3", "Developer & Creator"]
 ]
@@ -11,6 +11,7 @@ def arun(filepath):
         varnames, vartypes, varcontents = [], [], []
         allowedsymbols = ["a", "b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"]
         for line in f.read().split("\n"):
+            line = line.lstrip()
             if line.startswith("println(") and line.endswith(")"):
                 toprint = line.removeprefix("println(").removesuffix(")")
                 if toprint.startswith("'") and toprint.endswith("'"):
