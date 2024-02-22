@@ -18,11 +18,14 @@ def arun(filepath):
         comment = False
         linenum = 0
 
-        def run(line, inanif):
-            nonlocal condition, comment, error, linenum
+        def run(line):
+            nonlocal condition, comment, error, linenum, inanif
 
             line = line.lstrip()
-            if inanif and not condition:
+            if inanif and line.endswith("}"):
+                run(line.removesuffix("}"))
+                inanif = False
+            elif (inanif) and (not condition):
                 pass
             elif line == "":
                 pass
@@ -73,6 +76,18 @@ def arun(filepath):
                     elif lhl.isanint(varcontent):
                         vartype = "int"
                         varcontent = int(varcontent)
+                    elif varcontent.startswith("askinput('") and varcontent.endswith("')"):
+                        a = input(varcontent.removeprefix("askinput('").removesuffix("')"))
+                        varcontent = a
+                    elif varcontent.startswith("askinput(\"") and varcontent.endswith("\")"):
+                        a = input(varcontent.removeprefix("askinput(\"").removesuffix("\")"))
+                        varcontent = a
+                    elif varcontent.startswith("askinput(\"") and varcontent.endswith("')"):
+                        error = True
+                        print("Error Code 000-0004\nWhat the hell, do you really create strings like that: \"'? You disgust me.")
+                    elif varcontent.startswith("askinput('") and varcontent.endswith("\")"):
+                        error = True
+                        print("Error Code 000-0004\nWhat the hell, do you really create strings like that: '\"? You disgust me.")
                     else:
                         print("Error Code 000-0006")
                         print("Variable cannot contain anything other than a string, or an int.")
@@ -87,22 +102,53 @@ def arun(filepath):
                 elif condition == "false":
                     condition = False
                     print(f"Warning Code W-000-0001\nif at line {linenum} is never gonna be runned.\nWe prefer you to remove this if at it is never gonna be runned.")
+                elif "==" in condition:
+                    thing1 = condition.split("==")[0]
+                    thing2 = condition.split("==")[1]
+                    if thing1.endswith(" "):thing1=thing1.removesuffix(" ")
+                    if thing2.startswith(" "):thing2=thing2.removeprefix(" ")
+
+                    if thing1.startswith("'") and thing1.endswith("'"):thing1=thing1.removeprefix("'").removesuffix("'")
+                    elif thing1.startswith('"') and thing1.endswith('"'):thing1=thing1.removeprefix('"').removesuffix('"')
+                    elif thing1.startswith("'") and thing1.endswith('"'):error = True;print("Error Code 000-0004\nWhat the hell, do you really create strings like that: '\"? You disgust me.")
+                    elif thing1.startswith('"') and thing1.endswith("'"):error = True;print("Error Code 000-0004\nWhat the hell, do you really create strings like that: \"'? You disgust me.")
+                    elif thing1 in varnames:thing1=varcontents[varnames.index(thing1)]
+                    else:error = True;print(f"Error Code 000-0007\nUnknown item \"{thing1}\"")
+
+                    if thing2.startswith("'") and thing2.endswith("'"):thing2=thing2.removeprefix("'").removesuffix("'")
+                    elif thing2.startswith('"') and thing2.endswith('"'):thing2=thing2.removeprefix('"').removesuffix('"')
+                    elif thing2.startswith("'") and thing2.endswith('"'):error = True;print("Error Code 000-0004\nWhat the hell, do you really create strings like that: '\"? You disgust me.")
+                    elif thing2.startswith('"') and thing2.endswith("'"):error = True;print("Error Code 000-0004\nWhat the hell, do you really create strings like that: \"'? You disgust me.")
+                    elif thing2 in varnames:thing2=varcontents[varnames.index(thing2)]
+                    else:error = True;print(f"Error Code 000-0007\nUnknown item \"{thing2}\"")
+                
+                    condition = thing1 == thing2
+                elif "!=" in condition:
+                    thing1 = condition.split("!=")[0]
+                    thing2 = condition.split("!=")[1]
+                    if thing1.endswith(" "):thing1=thing1.removesuffix(" ")
+                    if thing2.startswith(" "):thing2=thing2.removeprefix(" ")
+                    if thing1 in varnames:thing1=varcontents[varnames.index(thing1)]
+                    if thing2 in varnames:thing2=varcontents[varnames.index(thing2)]
+                    if lhl.isanint(thing1):thing1=int(thing1)
+                    if lhl.isanint(thing2):thing2=int(thing2)
+                    if thing1 != thing2:
+                        condition = True
+                    else:
+                        condition = False
                 if line.endswith("}"):
                     if ";" in line.removeprefix(line.split("{")[0] + "{").removesuffix('}'):
                         for miniline in line.removeprefix(line.split("{")[0] + "{").removesuffix('}').split(";"):
-                            run(miniline, inanif=True)
+                            run(miniline)
                     else:
-                        run(line.removeprefix(line.split("{")[0] + "{").removesuffix('}'), inanif=True)
+                        run(line.removeprefix(line.split("{")[0] + "{").removesuffix('}'))
                 else:
                     inanif = True
-                    run(line.removeprefix(line.split("{")[0] + "{"), inanif=True)
-            elif inanif and line.endswith("}"):
-                inanif = False
-                run(line.removesuffix("}"), inanif=False)
+                    run(line.removeprefix(line.split("{")[0] + "{"))
 
         for line in f:
             linenum += 1
-            run(line.strip(), inanif=inanif)
+            run(line.strip())
             if error:
                 break
 
@@ -125,6 +171,7 @@ def run(filepath):
 
 def main():
     if len(sys.argv) < 3:
+        run("./test/1.ln")
         print("Usage: lunara <command> <filepath>")
         return
     
