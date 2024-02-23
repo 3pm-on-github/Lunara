@@ -1,2 +1,3 @@
 settings.lnst
 /__pycache__
+/test/*
