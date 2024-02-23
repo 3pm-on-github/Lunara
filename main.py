@@ -170,11 +170,12 @@ def run(filepath):
         print("Error Code 000-0001\nsettings.lnst file doesn't exist, did you run the setup.py script before using Lunara ?")
 
 def main():
-    if len(sys.argv) < 3:
-        print("Usage: lunara <command> <filepath>")
-    
     command = sys.argv[1]
-    filename = sys.argv[2]
+    if len(sys.argv) < 3 and command != "help":
+        print("Usage: lunara <command> [filepath]")
+        return
+    else:
+        filename = sys.argv[2]
 
     if command == "run":
         run(filename)
