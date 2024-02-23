@@ -3,7 +3,7 @@ import os
 from lunarahelplib import LunaraHelpLib
 
 lhl = LunaraHelpLib()
-VERSION = "v0.0.02A"
+VERSION = "v0.0.01C"
 CREDITS = [
     ["GachaYTB3", "Developer & Creator"]
 ]
