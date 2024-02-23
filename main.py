@@ -171,7 +171,6 @@ def run(filepath):
 
 def main():
     if len(sys.argv) < 3:
-        run("./test/1.ln")
         print("Usage: lunara <command> <filepath>")
         return
     
