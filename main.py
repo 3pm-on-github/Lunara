@@ -172,7 +172,6 @@ def run(filepath):
 def main():
     if len(sys.argv) < 3:
         print("Usage: lunara <command> <filepath>")
-        return
     
     command = sys.argv[1]
     filename = sys.argv[2]
