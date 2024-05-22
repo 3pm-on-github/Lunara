@@ -27,6 +27,8 @@ def arun(filepath):
                 inanif = False
             elif (inanif) and (not condition):
                 pass
+            elif line.endswith("]//"):
+                comment = False
             elif line == "":
                 pass
             elif comment:
@@ -35,8 +37,6 @@ def arun(filepath):
                 pass
             elif line.startswith("//["):
                 comment = True
-            elif line.endswith("]//"):
-                comment = False
             elif line.startswith("println(") and line.endswith(")"):
                 toprint = line.removeprefix("println(").removesuffix(")")
                 if toprint.startswith("'") and toprint.endswith("'"):
@@ -174,13 +174,13 @@ def main():
     if len(sys.argv) < 3 and command != "help":
         print("Usage: lunara <command> [filepath]")
         return
-    else:
+    elif command != "help":
         filename = sys.argv[2]
 
     if command == "run":
         run(filename)
     elif command == "help":
-        print("Usage: lunara <command> [filename]")
+        print("Usage: lunara <command> [filepath]")
         print("help: Shows this message")
         print("run: Runs a Lunara file")
         print("credits: Shows credits")
