@@ -1,0 +1,9 @@
+#i had to copy this from another rust program
+
+[package]
+name = "lunara"
+version = "0.0.1-c-rwrt"
+edition = "2021"
+
+[dependencies]
+# none lmao
